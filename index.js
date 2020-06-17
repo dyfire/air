@@ -9,11 +9,12 @@ class App extends events.EventEmitter {
     }
 
     use(fn) {
+        if (typeof fn != 'function') {
+            throw new TypeError('not function');
+        }
+
         this.middlewares.push(fn);
-    }
-
-    runHook() {
-
+        return this;
     }
 
     callback(req, res) {
@@ -25,7 +26,7 @@ class App extends events.EventEmitter {
             }
         };
 
-        next();
+
         res.end(res.body);
     }
 
