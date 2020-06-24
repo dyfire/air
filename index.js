@@ -6,6 +6,9 @@ class App extends events.EventEmitter {
         super();
         this.middlewares = [];
         this.ctx = {};
+        this.on('error', (err) => {
+            console.log(err);
+        })
     }
 
     use(fn) {
@@ -18,45 +21,56 @@ class App extends events.EventEmitter {
     }
 
     callback(req, res) {
-        const next = () => {
-            let i = 0;
-            let fn = this.middlewares[i];
+        this.ctx = {
+            req, res
+        }
+
+        const fn = (ctx, next) => {
+            let i = i || 0;
+            let func = this.middlewares[i];
+
+            if (!fn) {
+                return Promise.resolve();
+            }
 
             if (i === this.middlewares.length) {
-                return Promise.resolve();
-            } else {
-                try {
-                    return Promise.resolve(fn(req, res, (i + 1)));
-                } catch (err) {
-                    return Promise.reject(err);
-                }
+                func = next;
             }
-        };
 
-        let func = next;
-        console.log(func());
-        return res.end('hhh');
+            try {
+                return Promise.resolve(func(ctx, fn.bind(this, ctx, i + 1)));
+            } catch (err) {
+                return Promise.reject(err);
+            }
+        }
+
+        fn(this.ctx);
     }
 
     listen(...args) {
-        console.log(`server is running ${args[0]}`)
+        console.log(`server is running ${args[0]}`);
         return http.createServer(this.callback.bind(this)).listen(...args);
     }
 }
 
 function build(options) {
     const app = new App();
-    app.use(() => {
+    app.use(async (ctx, next) => {
         setTimeout(() => {
             console.log('111');
         }, 2000);
+
+        await next();
     });
 
-    app.use(() => {
+    app.use(async (ctx, next) => {
         setTimeout(() => {
-            console.log('hhh');
-        }, 1000);
-    })
+            console.log('111');
+        }, 2000);
+
+        ctx.res.end('hello body');
+        await next();
+    });
 
     return app;
 }
