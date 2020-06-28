@@ -25,10 +25,8 @@ class App extends events.EventEmitter {
             req, res
         }
 
-        const fn = (ctx, next, i) => {
-            i = i || 0;
+        const fn = (ctx, next, i = 0) => {
             let func = this.middlewares[i];
-
             if (!func) {
                 return Promise.resolve();
             }
@@ -38,15 +36,13 @@ class App extends events.EventEmitter {
             }
 
             try {
-                return Promise.resolve(func(ctx, fn.bind(this, ctx, i + 1)));
+                return Promise.resolve(func(ctx, fn.bind(this, ctx, next, i + 1)));
             } catch (err) {
                 return Promise.reject(err);
             }
         }
 
-        return (req, res) => {
-            return fn(this.ctx);
-        }
+        return fn(this.ctx);
     }
 
     listen(...args) {
@@ -71,6 +67,7 @@ function build(options) {
         }, 2000);
 
         ctx.res.end('hello body');
+        // await next();
     });
 
     return app;
