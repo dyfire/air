@@ -27,12 +27,13 @@ class App extends events.EventEmitter {
 
         const fn = (ctx, next, i = 0) => {
             let func = this.middlewares[i];
-            if (!func) {
-                return Promise.resolve();
-            }
 
             if (i === this.middlewares.length) {
                 func = next;
+            }
+
+            if (!func) {
+                return Promise.resolve();
             }
 
             try {
@@ -53,23 +54,26 @@ class App extends events.EventEmitter {
 
 function build(options) {
     const app = new App();
-    app.use(async (ctx, next) => {
-        setTimeout(() => {
+    const one = async (ctx, next) => {
+        await setTimeout(() => {
             console.log('111');
-        }, 2000);
+        }, 200);
 
         await next();
-    });
+    };
 
-    app.use(async (ctx, next) => {
-        setTimeout(() => {
+    const two = async (ctx, next) => {
+        await setTimeout(() => {
             console.log('222');
-        }, 2000);
+        }, 100);
 
+        await next();
         ctx.res.end('hello body');
-        // await next();
-    });
 
+    };
+
+    app.use(one);
+    app.use(two);
     return app;
 }
 
