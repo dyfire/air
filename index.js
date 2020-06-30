@@ -21,10 +21,6 @@ class App extends events.EventEmitter {
     }
 
     callback(req, res) {
-        this.ctx = {
-            req, res
-        }
-
         const fn = (ctx, next, i = 0) => {
             let func = this.middlewares[i];
 
@@ -42,13 +38,31 @@ class App extends events.EventEmitter {
                 return Promise.reject(err);
             }
         }
+        
+        const handler = (req, res) => {
+            const ctx = {
+                req, res
+            }
 
-        return fn(this.ctx);
+            fn(ctx).then(() => {
+                return this.responsed(ctx);
+            }).catch(err => {
+                console.log(err);
+            });
+        } 
+
+        return handler(req, res);
     }
 
     listen(...args) {
         console.log(`server is running ${args[0]}`);
         return http.createServer(this.callback.bind(this)).listen(...args);
+    }
+
+    responsed(ctx) {
+        let body = ctx.body;
+
+        return ctx.res.end(body);
     }
 }
 
@@ -66,10 +80,9 @@ function build(options) {
         await setTimeout(() => {
             console.log('222');
         }, 100);
+        ctx.body = "hahha";
 
         await next();
-        ctx.res.end('hello body');
-
     };
 
     app.use(one);
