@@ -8,19 +8,23 @@ class Router extends EventEmitter {
   constructor(opt) {
     super();
     this.router = [];
+    this.method = [
+      'GET',
+      'POST'
+    ];
+
+    for (const item of this.method) {
+      this.router[item] = new Map();
+    }
   }
 
   post(path, fn) {
-    let map = new Map();
-    map.set(path, fn);
-    this.router['POST'] = map;
+    this.router['POST'].set(path, fn);
     return this;
   }
 
   get(path, fn) {
-    let map = new Map();
-    map.set(path, fn);
-    this.router['GET'] = map;
+    this.router['GET'].set(path, fn);
     return this;
   }
 
@@ -34,10 +38,17 @@ class Router extends EventEmitter {
 
     for (let [k, fn] of this.router[method].entries()) {
       if (k == pathname) {
-        fn && await fn(ctx);
-        break;
+        return fn && await fn(ctx);
+      } else {
+
       }
     }
+
+    const error = async (ctx) => {
+      ctx.body = '404';
+    }
+
+    await error(ctx);
   }
 
   register() {

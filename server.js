@@ -9,6 +9,7 @@ router.get('/user', async (ctx) => {
 });
 
 router.get('/list', async (ctx) => {
+  
   ctx.body = 'list';
 });
 
