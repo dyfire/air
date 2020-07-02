@@ -33,14 +33,41 @@ class Router extends EventEmitter {
       pathname,
       query
     } = Url.parse(ctx.req.url);
+    let match = false;
     const method = ctx.req.method;
     ctx.param = queryString.parse(query);
 
-    for (let [k, fn] of this.router[method].entries()) {
-      if (k == pathname) {
-        return fn && await fn(ctx);
-      } else {
+    for (const [k, fn] of this.router[method].entries()) {
+      if (typeof fn !== 'function') {
+        throw new Error('callback is not function');
+      }
 
+      // 全匹配
+      if (k == pathname) {
+        match = true;
+      } else {
+        const stacks = k.split('/');
+        const urls = pathname.split('/');
+
+        if (stacks.length === urls.length) {
+          let param = {};
+          for (let i = 0; i < stacks.length; i++) {
+            if (stacks[i].startsWith(':')) {
+              const k = stacks[i].split(':')[1];
+              stacks[i] = urls[i];
+              param[k] = urls[i];
+            }
+          }
+
+          if (stacks.join('/').trim() === pathname) {
+            match = true;
+            Object.assign(ctx.param, param);
+          }
+        }
+      }
+
+      if (match) {
+        return fn && await fn(ctx);
       }
     }
 

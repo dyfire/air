@@ -9,9 +9,14 @@ router.get('/user', async (ctx) => {
 });
 
 router.get('/list', async (ctx) => {
-  
+
   ctx.body = 'list';
 });
+
+router.get('/user/:id', async (ctx) => {
+
+  ctx.body = ctx.param.id;
+})
 
 app.use(router.register());
 
