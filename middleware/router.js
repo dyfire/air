@@ -78,6 +78,10 @@ class Router extends EventEmitter {
     await error(ctx);
   }
 
+  router() {
+
+  }
+
   register() {
     return async (ctx, next) => {
       await this.parse(ctx);
