@@ -28,6 +28,11 @@ class Router extends EventEmitter {
     return this;
   }
 
+  any(path, fn) {
+    this.router['GET'].set(path, fn);
+    return this;
+  }
+
   async parse(ctx) {
     const {
       pathname,

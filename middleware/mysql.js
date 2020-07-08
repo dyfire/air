@@ -14,13 +14,11 @@ async function mysqlConnecton(opt) {
 }
 
 async function db(ctx, next) {
-  console.log('do');
   if (!ctx.mysql) {
-    console.log('init');
     ctx.mysql = await mysqlConnecton(this);
   }
 
-  next();
+  await next();
 }
 
 module.exports = db;

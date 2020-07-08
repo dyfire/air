@@ -1,5 +1,6 @@
 const http = require('http');
 const events = require('events');
+const url = require('url');
 const Router = require('./middleware/router');
 
 class App extends events.EventEmitter {
@@ -22,6 +23,12 @@ class App extends events.EventEmitter {
   }
 
   callback(req, res) {
+    var pathname = url.parse(req.url).pathname;
+    if (pathname == '/favicon.ico') {
+      return;
+    }
+
+    this.init(req, res);
     const fn = (ctx, next, i = 0) => {
       let func = this.middlewares[i];
 
@@ -41,10 +48,8 @@ class App extends events.EventEmitter {
     }
 
     const handler = (req, res) => {
-      const ctx = {
-        req,
-        res
-      }
+      Object.assign(this.ctx, { req, res });
+      const ctx = this.ctx;
 
       fn(ctx).then(() => {
         return this.responsed(ctx);
@@ -65,6 +70,12 @@ class App extends events.EventEmitter {
     let body = ctx.body;
 
     return ctx.res.end(body);
+  }
+
+  init(req, res) {
+    Object.assign(this.ctx, { method: req.method });
+    Object.assign(this.ctx, { get: {} });
+    Object.assign(this.ctx, { post: {} });
   }
 }
 
