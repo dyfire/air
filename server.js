@@ -3,28 +3,22 @@ const Router = require('./middleware/router');
 const db = require('./middleware/mysql');
 const config = require('./config/db.json');
 const contentParse = require('./middleware/content-parse');
+const fs = require('fs');
 
 const app = new App();
-app.use(db.bind(config));
 app.use(contentParse());
+app.use(db.bind(config));
 
 const router = new Router();
 router.get('/user', async (ctx) => {
-  let html = `
-      <h1>request post demo</h1>
-      <form method="POST" action="/user">
-        <p>userName</p>
-        <input name="userName" /><br/>
-        <p>nickName</p>
-        <input name="nickName" /><br/>
-        <p>email</p>
-        <input name="email" /><br/>
-        <p>content</p>
-        <textarea name="content"></textarea>
-        <button type="submit">submit</button>
-      </form>`;
+  let html = fs.readFileSync('index.html');
 
   ctx.body = html;
+});
+
+router.post('/user', async (ctx) => {
+  let name = ctx.post.name;
+  ctx.body = "ok" + name;
 });
 
 router.get('/list', async (ctx) => {

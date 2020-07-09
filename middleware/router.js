@@ -1,8 +1,6 @@
 const Url = require('url');
 const queryString = require('querystring');
-const {
-  EventEmitter
-} = require('events');
+const { EventEmitter } = require('events');
 
 class Router extends EventEmitter {
   constructor(opt) {
@@ -10,7 +8,7 @@ class Router extends EventEmitter {
     this.router = [];
     this.method = [
       'GET',
-      'POST'
+      'POST',
     ];
 
     for (const item of this.method) {
@@ -28,16 +26,8 @@ class Router extends EventEmitter {
     return this;
   }
 
-  any(path, fn) {
-    this.router['GET'].set(path, fn);
-    return this;
-  }
-
   async parse(ctx) {
-    const {
-      pathname,
-      query
-    } = Url.parse(ctx.req.url);
+    const { pathname, query } = Url.parse(ctx.req.url);
     let match = false;
     const method = ctx.req.method;
     ctx.param = queryString.parse(query);
